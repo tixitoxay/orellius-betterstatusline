@@ -9,7 +9,7 @@ function progressBar(pct: number): string {
   return "\u2588".repeat(filled) + "\u2591".repeat(empty);
 }
 
-function formatResetTime(resetsAt: string | null): string {
+function formatResetDateTime(resetsAt: string | null): string {
   if (!resetsAt) return "";
 
   const resetDate = new Date(resetsAt);
@@ -28,25 +28,54 @@ function formatResetTime(resetsAt: string | null): string {
   if (hours > 0) parts.push(`${hours}h`);
   if (minutes > 0 && days === 0) parts.push(`${minutes}m`);
 
-  return parts.length > 0 ? `Resets in ${parts.join(" ")}` : "Resets in <1m";
+  const countdown = parts.length > 0 ? parts.join(" ") : "<1m";
+
+  const dateStr = resetDate.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const timeStr = resetDate.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `Resets in ${countdown} (${dateStr} ${timeStr})`;
 }
 
-function statusEmoji(pct: number): string {
-  if (pct >= 80) return "[!]";
-  if (pct >= 50) return "[~]";
+function colorGrade(pct: number): string {
+  if (pct >= 100) return "RATE_LIMITED";
+  if (pct >= 80) return "RED";
+  if (pct >= 50) return "ORANGE";
+  return "GREEN";
+}
+
+function statusTag(pct: number): string {
+  const grade = colorGrade(pct);
+  if (grade === "RATE_LIMITED") return " [RATE LIMITED]";
+  if (grade === "RED") return " [HIGH]";
+  if (grade === "ORANGE") return " [MODERATE]";
   return "";
 }
 
 function formatWindow(label: string, window: UsageWindow | null): string {
-  if (!window) return `${label}\n  N/A (not on your plan)\n`;
+  if (!window) return `${label}\n  N/A (not on your plan)`;
 
   const pct = window.utilization;
-  const bar = progressBar(pct);
-  const reset = formatResetTime(window.resets_at);
-  const status = statusEmoji(pct);
-  const resetLine = reset ? `  ${reset}` : "";
+  const grade = colorGrade(pct);
 
-  return `${label} ${status}\n  ${bar}  ${pct.toFixed(0)}%\n${resetLine}`.trimEnd();
+  if (grade === "RATE_LIMITED") {
+    const resetInfo = formatResetDateTime(window.resets_at);
+    return `${label} [RATE LIMITED]\n  ${"X".repeat(BAR_WIDTH)}  100%\n  ${resetInfo || "Reset time unknown"}`;
+  }
+
+  const bar = progressBar(pct);
+  const tag = statusTag(pct);
+  const resetInfo = formatResetDateTime(window.resets_at);
+  const resetLine = resetInfo ? `\n  ${resetInfo}` : "";
+
+  return `${label}${tag}\n  ${bar}  ${pct.toFixed(0)}%${resetLine}`;
 }
 
 export function formatFullUsage(data: UsageResponse, source: string): string {
@@ -55,33 +84,36 @@ export function formatFullUsage(data: UsageResponse, source: string): string {
   lines.push("=== Claude Plan Usage ===");
   lines.push("");
 
-  lines.push(formatWindow("SESSION (5-hour window)", data.five_hour));
+  lines.push(formatWindow("Current Session (5-hour window)", data.five_hour));
   lines.push("");
 
-  lines.push(formatWindow("WEEKLY - All Models (7-day)", data.seven_day));
+  lines.push(formatWindow("Weekly Usage - All Models (7-day)", data.seven_day));
   lines.push("");
 
   if (data.seven_day_opus !== undefined) {
-    lines.push(formatWindow("WEEKLY - Opus", data.seven_day_opus));
+    lines.push(formatWindow("Weekly Usage - Opus Only", data.seven_day_opus));
     lines.push("");
   }
 
   if (data.seven_day_sonnet !== undefined) {
-    lines.push(formatWindow("WEEKLY - Sonnet", data.seven_day_sonnet));
+    lines.push(formatWindow("Weekly Usage - Sonnet Only", data.seven_day_sonnet));
     lines.push("");
   }
 
   if (data.seven_day_oauth_apps) {
-    lines.push(formatWindow("WEEKLY - OAuth Apps", data.seven_day_oauth_apps));
+    lines.push(formatWindow("Weekly Usage - OAuth Apps", data.seven_day_oauth_apps));
     lines.push("");
   }
 
   if (data.seven_day_cowork) {
-    lines.push(formatWindow("WEEKLY - Cowork", data.seven_day_cowork));
+    lines.push(formatWindow("Weekly Usage - Cowork", data.seven_day_cowork));
     lines.push("");
   }
 
   lines.push(formatExtraUsage(data.extra_usage));
+  lines.push("");
+  lines.push("--- Color Grading ---");
+  lines.push("0-49% = GREEN (safe)  |  50-79% = ORANGE (moderate)  |  80-99% = RED (high)  |  100% = RATE LIMITED");
   lines.push("");
 
   const cacheAge = getCacheAge();
@@ -98,7 +130,7 @@ export function formatFullUsage(data: UsageResponse, source: string): string {
 
 export function formatSessionUsage(data: UsageResponse): string {
   const lines: string[] = [];
-  lines.push("=== Session Usage (5-hour window) ===");
+  lines.push("=== Current Session (5-hour window) ===");
   lines.push("");
   lines.push(formatWindow("Current Session", data.five_hour));
   return lines.join("\n");
@@ -113,12 +145,12 @@ export function formatWeeklyLimits(data: UsageResponse): string {
   lines.push("");
 
   if (data.seven_day_opus !== undefined) {
-    lines.push(formatWindow("Opus", data.seven_day_opus));
+    lines.push(formatWindow("Opus Only", data.seven_day_opus));
     lines.push("");
   }
 
   if (data.seven_day_sonnet !== undefined) {
-    lines.push(formatWindow("Sonnet", data.seven_day_sonnet));
+    lines.push(formatWindow("Sonnet Only", data.seven_day_sonnet));
     lines.push("");
   }
 
@@ -136,11 +168,11 @@ export function formatWeeklyLimits(data: UsageResponse): string {
 }
 
 function formatExtraUsage(extra: ExtraUsage | null): string {
-  if (!extra) return "EXTRA USAGE: N/A";
+  if (!extra) return "Extra Usage: N/A";
 
-  if (!extra.is_enabled) return "EXTRA USAGE: Disabled";
+  if (!extra.is_enabled) return "Extra Usage: Disabled";
 
-  const parts = ["EXTRA USAGE: Enabled"];
+  const parts = ["Extra Usage: Enabled"];
   if (extra.monthly_limit !== null) {
     parts.push(`  Monthly limit: $${extra.monthly_limit.toFixed(2)}`);
   }
@@ -161,27 +193,41 @@ export function formatRateStatus(data: UsageResponse): string {
 
   const sessionPct = data.five_hour.utilization;
   const weeklyPct = data.seven_day.utilization;
+  const sessionGrade = colorGrade(sessionPct);
+  const weeklyGrade = colorGrade(weeklyPct);
 
-  if (sessionPct >= 80 || weeklyPct >= 80) {
-    lines.push("STATUS: HIGH USAGE");
+  if (sessionGrade === "RATE_LIMITED" || weeklyGrade === "RATE_LIMITED") {
+    lines.push("STATUS: RATE LIMITED");
+    lines.push("You have hit your usage limit.");
+    if (weeklyGrade === "RATE_LIMITED") {
+      const reset = formatResetDateTime(data.seven_day.resets_at);
+      lines.push(`Weekly limit reached. ${reset}`);
+    }
+    if (sessionGrade === "RATE_LIMITED") {
+      const reset = formatResetDateTime(data.five_hour.resets_at);
+      lines.push(`Session limit reached. ${reset}`);
+    }
+  } else if (sessionGrade === "RED" || weeklyGrade === "RED") {
+    lines.push("STATUS: HIGH USAGE (80%+)");
     lines.push("You are likely to experience rate limiting soon.");
-  } else if (sessionPct >= 50 || weeklyPct >= 50) {
-    lines.push("STATUS: MODERATE USAGE");
+  } else if (sessionGrade === "ORANGE" || weeklyGrade === "ORANGE") {
+    lines.push("STATUS: MODERATE USAGE (50-79%)");
     lines.push("You have headroom but are approaching limits.");
   } else {
-    lines.push("STATUS: LOW USAGE");
+    lines.push("STATUS: LOW USAGE (<50%)");
     lines.push("Plenty of capacity available.");
   }
 
   lines.push("");
-  lines.push(`Session: ${sessionPct.toFixed(0)}% | Weekly: ${weeklyPct.toFixed(0)}%`);
+  lines.push(`Current Session: ${progressBar(sessionPct)}  ${sessionPct.toFixed(0)}%`);
+  lines.push(`Weekly Usage:    ${progressBar(weeklyPct)}  ${weeklyPct.toFixed(0)}%`);
 
-  if (sessionPct >= 80) {
-    const reset = formatResetTime(data.five_hour.resets_at);
-    lines.push(`Session limit approaching. ${reset}`);
+  if (sessionPct >= 80 && sessionGrade !== "RATE_LIMITED") {
+    const reset = formatResetDateTime(data.five_hour.resets_at);
+    lines.push(`\nSession limit approaching. ${reset}`);
   }
-  if (weeklyPct >= 80) {
-    const reset = formatResetTime(data.seven_day.resets_at);
+  if (weeklyPct >= 80 && weeklyGrade !== "RATE_LIMITED") {
+    const reset = formatResetDateTime(data.seven_day.resets_at);
     lines.push(`Weekly limit approaching. ${reset}`);
   }
 
