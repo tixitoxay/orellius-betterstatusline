@@ -48,7 +48,7 @@ export async function fetchUsage(): Promise<FetchResult> {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         "anthropic-beta": BETA_HEADER,
-        "User-Agent": "claudeusage-mcp/1.0.0",
+        "User-Agent": "orellius-claudetracker/1.0.0",
       },
     });
 

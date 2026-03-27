@@ -11,7 +11,7 @@ import {
 } from "./formatter.js";
 
 const server = new McpServer({
-  name: "claudeusage-mcp",
+  name: "orellius-claudetracker",
   version: "1.0.0",
 });
 
@@ -98,6 +98,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("Failed to start claudeusage-mcp:", err);
+  console.error("Failed to start orellius-claudetracker:", err);
   process.exit(1);
 });

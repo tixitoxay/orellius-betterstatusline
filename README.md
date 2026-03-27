@@ -1,4 +1,4 @@
-# claudeusage-mcp
+# orellius-claudetracker
 
 An MCP server that gives you real-time visibility into your Claude Pro/Max subscription usage — directly inside Claude Code.
 
@@ -97,11 +97,11 @@ When rate-limited:
 ### Option 1: `claude mcp add` (recommended)
 
 ```bash
-git clone https://github.com/OrelliusAI/claudeusage-mcp.git
-cd claudeusage-mcp
+git clone https://github.com/OrelliusAI/orellius-claudetracker.git
+cd orellius-claudetracker
 npm install && npm run build
 
-claude mcp add claudeusage -- node $(pwd)/dist/index.js
+claude mcp add orellius-claudetracker -- node $(pwd)/dist/index.js
 ```
 
 Restart Claude Code. Then ask "what's my usage?" or type `/usage`.
@@ -109,8 +109,8 @@ Restart Claude Code. Then ask "what's my usage?" or type `/usage`.
 ### Option 2: Manual config
 
 ```bash
-git clone https://github.com/OrelliusAI/claudeusage-mcp.git
-cd claudeusage-mcp
+git clone https://github.com/OrelliusAI/orellius-claudetracker.git
+cd orellius-claudetracker
 npm install && npm run build
 ```
 
@@ -119,9 +119,9 @@ Add to your MCP config (`.claude.json` or project `.mcp.json`):
 ```json
 {
   "mcpServers": {
-    "claudeusage": {
+    "orellius-claudetracker": {
       "command": "node",
-      "args": ["/absolute/path/to/claudeusage-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/orellius-claudetracker/dist/index.js"]
     }
   }
 }
